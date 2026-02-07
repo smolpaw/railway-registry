@@ -7,7 +7,7 @@ Deploy a private [Docker Registry](https://distribution.github.io/distribution/)
 ## Setup
 
 1. Click the Railway button above
-2. Add an **S3** service and a **Volume** (mounted at `/etc/registry`)
+2. Add an **S3** service
 3. Set the required environment variables below
 4. Deploy
 
@@ -37,7 +37,7 @@ docker pull <your-railway-domain>/myimage:latest
 
 ## Notes
 
-- Images are stored in S3, not on disk — the volume is only used for the credentials file
-- Changing `REGISTRY_USERNAME` or `REGISTRY_PASSWORD` takes effect on the next deploy
+- Images are stored in S3, not on disk
+- Credentials are regenerated from env vars on each deploy, so password changes take effect immediately
 - Image deletion is enabled by default
 - Source: [distribution/distribution](https://github.com/distribution/distribution)

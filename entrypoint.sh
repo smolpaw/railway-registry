@@ -30,15 +30,8 @@ fi
 # Generate registry config from template
 envsubst < /railway/config.yml.tmpl > /etc/distribution/config.yml
 
-# Regenerate htpasswd only if credentials changed or file doesn't exist
-HTPASSWD_PATH="/etc/registry/htpasswd"
-mkdir -p "$(dirname "$HTPASSWD_PATH")"
-if [ -f "$HTPASSWD_PATH" ] && htpasswd -vb "$HTPASSWD_PATH" "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" > /dev/null 2>&1; then
-  echo "Registry credentials unchanged"
-else
-  htpasswd -Bbc "$HTPASSWD_PATH" "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD"
-  echo "Registry credentials updated"
-fi
+# Generate htpasswd from current env vars
+htpasswd -Bbc /etc/registry/htpasswd "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD"
 
 # Hand off to the original entrypoint: ENTRYPOINT ["registry"] CMD ["serve", "/etc/distribution/config.yml"]
 exec registry serve /etc/distribution/config.yml

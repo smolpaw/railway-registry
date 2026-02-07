@@ -1,6 +1,7 @@
 FROM registry:3
 
-RUN apk add --no-cache apache2-utils gettext
+RUN apk add --no-cache apache2-utils gettext \
+    && mkdir -p /etc/registry
 
 COPY config.yml /railway/config.yml.tmpl
 COPY entrypoint.sh /railway/entrypoint.sh
