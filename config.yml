@@ -1,0 +1,30 @@
+version: 0.1
+
+log:
+  fields:
+    service: ${RAILWAY_SERVICE_NAME}
+    environment: ${RAILWAY_ENVIRONMENT_NAME}
+
+storage:
+  delete:
+    enabled: true
+  cache:
+    blobdescriptor: inmemory
+  s3:
+    accesskey: ${AWS_ACCESS_KEY_ID}
+    secretkey: ${AWS_SECRET_ACCESS_KEY}
+    region: ${AWS_DEFAULT_REGION}
+    regionendpoint: ${AWS_ENDPOINT_URL}
+    bucket: ${AWS_S3_BUCKET_NAME}
+    forcepathstyle: true
+
+http:
+  addr: :5000
+  secret: ${REGISTRY_SECRET}
+  headers:
+    X-Content-Type-Options: [nosniff]
+
+auth:
+  htpasswd:
+    realm: basic-realm
+    path: /etc/registry/htpasswd
