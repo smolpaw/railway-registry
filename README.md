@@ -2,7 +2,7 @@
 
 Deploy a private [Docker Registry](https://distribution.github.io/distribution/) on Railway, backed by S3 storage with basic auth.
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/xxx)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/registry?referralCode=hbN2rY&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
 ## Setup
 
