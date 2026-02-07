@@ -15,9 +15,9 @@ Deploy a private [Docker Registry](https://distribution.github.io/distribution/)
 
 | Variable | Description |
 |---|---|
-| `REGISTRY_USERNAME` | Username for `docker login` |
-| `REGISTRY_PASSWORD` | Password for `docker login` |
-| `REGISTRY_SECRET` | Random string used to sign tokens internally |
+| `AUTH_USERNAME` | Username for `docker login` |
+| `AUTH_PASSWORD` | Password for `docker login` |
+| `HTTP_SECRET` | Random string used to sign tokens internally |
 | `AWS_ACCESS_KEY_ID` | Provided by Railway S3 service |
 | `AWS_SECRET_ACCESS_KEY` | Provided by Railway S3 service |
 | `AWS_DEFAULT_REGION` | Provided by Railway S3 service |
@@ -38,6 +38,6 @@ docker pull <your-railway-domain>/myimage:latest
 ## Notes
 
 - Images are stored in S3, not on disk
-- Credentials are regenerated from env vars on each deploy, so password changes take effect immediately
+- Credentials are regenerated from env vars on each deploy, so changes to `AUTH_USERNAME` or `AUTH_PASSWORD` take effect immediately
 - Image deletion is enabled by default
 - Source: [distribution/distribution](https://github.com/distribution/distribution)

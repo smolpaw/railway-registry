@@ -20,7 +20,7 @@ storage:
 
 http:
   addr: :5000
-  secret: ${REGISTRY_SECRET}
+  secret: ${HTTP_SECRET}
   headers:
     X-Content-Type-Options: [nosniff]
 

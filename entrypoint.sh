@@ -9,9 +9,9 @@ REQUIRED_VARS="
   AWS_DEFAULT_REGION
   AWS_ENDPOINT_URL
   AWS_S3_BUCKET_NAME
-  REGISTRY_SECRET
-  REGISTRY_USERNAME
-  REGISTRY_PASSWORD
+  HTTP_SECRET
+  AUTH_USERNAME
+  AUTH_PASSWORD
 "
 
 missing=0
@@ -31,7 +31,7 @@ fi
 envsubst < /railway/config.yml.tmpl > /etc/distribution/config.yml
 
 # Generate htpasswd from current env vars
-htpasswd -Bbc /etc/registry/htpasswd "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD"
+htpasswd -Bbc /etc/registry/htpasswd "$AUTH_USERNAME" "$AUTH_PASSWORD"
 
 # Hand off to the original entrypoint: ENTRYPOINT ["registry"] CMD ["serve", "/etc/distribution/config.yml"]
 exec registry serve /etc/distribution/config.yml
