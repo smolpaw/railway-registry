@@ -23,6 +23,7 @@ Deploy a private [Docker Registry](https://distribution.github.io/distribution/)
 | `AWS_DEFAULT_REGION` | Provided by Railway S3 service |
 | `AWS_ENDPOINT_URL` | Provided by Railway S3 service |
 | `AWS_S3_BUCKET_NAME` | Provided by Railway S3 service |
+| `GARBAGE_COLLECT_ON_START` | Optional. `true` frees the storage of deleted images at every start; see [Cleanup](#cleanup) |
 
 `RAILWAY_SERVICE_NAME` and `RAILWAY_ENVIRONMENT_NAME` are injected automatically by Railway.
 
@@ -35,9 +36,24 @@ docker push <your-railway-domain>/myimage:latest
 docker pull <your-railway-domain>/myimage:latest
 ```
 
+## Cleanup
+
+Deleting an image (`DELETE /v2/<name>/manifests/<digest>`) removes only its manifest. Its layers stay in the bucket, and keep costing storage, until garbage collection removes every blob that no manifest references. The registry never runs it by itself.
+
+**On every start (opt-in).** Set `GARBAGE_COLLECT_ON_START=true`. Railway redeploys the service when a variable changes, so setting it runs the first cleanup, and every later deploy or restart runs it again before the registry serves, so no push can race it. The deploy log shows the result (`... blobs eligible for deletion`). If collection fails, the log shows a warning and the registry starts anyway. A large bucket makes startup slower, since every manifest and blob is listed first.
+
+**Once, by hand.** From a directory linked to the project (`railway link`), with nothing pushing:
+
+```sh
+railway ssh -- registry garbage-collect --dry-run /etc/distribution/config.yml
+railway ssh -- registry garbage-collect /etc/distribution/config.yml
+```
+
+Pushing a tag again (`:latest`) doesn't delete the image it replaces: that manifest stays, untagged, and so do its layers. Only deleting it frees them. `registry garbage-collect --delete-untagged` would remove such manifests too, but it has removed the per-platform manifests of multi-arch images in the past, so neither option here uses it.
+
 ## Notes
 
 - Images are stored in S3, not on disk
 - Credentials are regenerated from env vars on each deploy, so changes to `AUTH_USERNAME` or `AUTH_PASSWORD` take effect immediately
-- Image deletion is enabled by default
+- Image deletion is enabled by default; deleting frees storage only after [cleanup](#cleanup)
 - Source: [distribution/distribution](https://github.com/distribution/distribution)

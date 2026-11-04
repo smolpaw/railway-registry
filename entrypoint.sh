@@ -33,5 +33,18 @@ envsubst < /railway/config.yml.tmpl > /etc/distribution/config.yml
 # Generate htpasswd from current env vars
 htpasswd -Bbc /etc/registry/htpasswd "$AUTH_USERNAME" "$AUTH_PASSWORD"
 
+# Opt-in cleanup: deleting an image only removes its manifest, and its layers stay in the bucket
+# until garbage collection removes every blob no manifest references. It runs here, before the
+# registry serves, so no push can race it. A failure is logged and doesn't stop the start.
+if [ "${GARBAGE_COLLECT_ON_START:-false}" = "true" ]; then
+  echo "Garbage collection: removing unreferenced blobs..."
+  if registry garbage-collect /etc/distribution/config.yml > /tmp/garbage-collect.log 2>&1; then
+    echo "Garbage collection: done: $(grep 'blobs marked' /tmp/garbage-collect.log || echo 'no summary')"
+  else
+    echo "WARNING: garbage collection failed; starting anyway:" >&2
+    tail -n 20 /tmp/garbage-collect.log >&2
+  fi
+fi
+
 # Hand off to the original entrypoint: ENTRYPOINT ["registry"] CMD ["serve", "/etc/distribution/config.yml"]
 exec registry serve /etc/distribution/config.yml
