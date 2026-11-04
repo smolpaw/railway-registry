@@ -40,7 +40,7 @@ docker pull <your-railway-domain>/myimage:latest
 
 Deleting an image (`DELETE /v2/<name>/manifests/<digest>`) removes only its manifest. Its layers stay in the bucket, and keep costing storage, until garbage collection removes every blob that no manifest references. The registry never runs it by itself.
 
-**On every start (opt-in).** Set `GARBAGE_COLLECT_ON_START=true`. Railway redeploys the service when a variable changes, so setting it runs the first cleanup, and every later deploy or restart runs it again before the registry serves, so no push can race it. The deploy log shows the result (`... blobs eligible for deletion`). If collection fails, the log shows a warning and the registry starts anyway. A large bucket makes startup slower, since every manifest and blob is listed first.
+**On every start (opt-in).** Set `GARBAGE_COLLECT_ON_START=true` and deploy the change (the dashboard stages variable changes until you deploy them; `railway variables --set` deploys at once). That deploy runs the first cleanup, and every later deploy or restart runs it again before the registry serves, so no push can race it. The deploy log shows the result (`... blobs eligible for deletion`). If collection fails, the log shows a warning and the registry starts anyway. A large bucket makes startup slower, since every manifest and blob is listed first.
 
 **Once, by hand.** From a directory linked to the project (`railway link`), with nothing pushing:
 
@@ -49,7 +49,7 @@ railway ssh -- registry garbage-collect --dry-run /etc/distribution/config.yml
 railway ssh -- registry garbage-collect /etc/distribution/config.yml
 ```
 
-Pushing a tag again (`:latest`) doesn't delete the image it replaces: that manifest stays, untagged, and so do its layers. Only deleting it frees them. `registry garbage-collect --delete-untagged` would remove such manifests too, but it has removed the per-platform manifests of multi-arch images in the past, so neither option here uses it.
+Pushing a tag again (`:latest`) doesn't delete the image it replaces: that manifest stays, untagged, and so do its layers. In a repository pushed to often, these old manifests hold most of the storage, and the registry's API can't list them: they are the `link` files under `docker/registry/v2/repositories/<name>/_manifests/revisions/sha256/<digest>/` in the bucket, and `DELETE /v2/<name>/manifests/sha256:<digest>` deletes each. `registry garbage-collect --delete-untagged` would remove them, but it is known to delete parts of multi-arch images that are still tagged (distribution/distribution#3004, #4939), so neither option here uses it.
 
 ## Notes
 
